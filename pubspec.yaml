@@ -1,0 +1,42 @@
+name: projeto_integrado
+description: A new Flutter project.
+version: 1.0.0+1
+environment: 
+  sdk: '>=2.12.0 <3.0.0'
+dependencies: 
+  flutter: 
+    sdk: flutter
+  flutter_localizations: 
+    sdk: flutter
+  cached_network_image: ^3.3.0
+  flutter_svg: ^2.0.9
+  connectivity_plus: ^5.0.2
+dev_dependencies: 
+  flutter_test: 
+    sdk: flutter
+flutter: 
+  uses-material-design: true
+  assets: 
+    - assets/
+    - assets/images/
+  fonts: 
+    - family: Josefin Sans
+      fonts: 
+        - asset: assets/fonts/JosefinSansRomanBold.ttf
+          weight: 700
+    - family: Kumbh Sans
+      fonts: 
+        - asset: assets/fonts/KumbhSansRegular.ttf
+          weight: 400
+        - asset: assets/fonts/KumbhSansBold.ttf
+          weight: 700
+        - asset: assets/fonts/KumbhSansLight.ttf
+          weight: 300
+        - asset: assets/fonts/KumbhSansExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/KumbhSansMedium.ttf
+          weight: 500
+    - family: Rubik
+      fonts: 
+        - asset: assets/fonts/RubikLight.ttf
+          weight: 300
