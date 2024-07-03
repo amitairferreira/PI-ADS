@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:projeto_integrado/presentation/tela_principal_container/tela_principal_container.dart';
-import '../core/app_export.dart';
 import '../presentation/app_navigation/app_navigation.dart';
 import '../presentation/tela_inicial/tela_inicial.dart';
 import '../presentation/tela_principal/tela_principal.dart';

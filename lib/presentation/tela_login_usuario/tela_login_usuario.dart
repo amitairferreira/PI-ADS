@@ -1,6 +1,5 @@
 import 'package:projeto_integrado/presentation/tela_cadastro_usuario/tela_cadastro_usuario.dart';
 import 'package:flutter/material.dart';
-import 'package:projeto_integrado/presentation/tela_principal/tela_principal.dart';
 import 'package:projeto_integrado/presentation/tela_principal_container/tela_principal_container.dart';
 import '../../core/app_export.dart';
 import '../../theme/custom_button_style.dart';
