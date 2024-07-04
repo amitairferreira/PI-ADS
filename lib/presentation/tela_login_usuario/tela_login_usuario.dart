@@ -1,18 +1,41 @@
-import 'package:projeto_integrado/presentation/tela_cadastro_usuario/tela_cadastro_usuario.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:projeto_integrado/presentation/tela_cadastro_usuario/tela_cadastro_usuario.dart';
 import 'package:projeto_integrado/presentation/tela_principal_container/tela_principal_container.dart';
 import '../../core/app_export.dart';
 import '../../theme/custom_button_style.dart';
 import '../../widgets/custom_elevated_button.dart';
 import '../../widgets/custom_text_form_field.dart'; // ignore_for_file: must_be_immutable
 
-// ignore_for_file: must_be_immutable
 class LoginUsuario extends StatelessWidget {
-  void _navigateToHome(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => TelaPrincipalContainer()),
-    );
+  LoginUsuario({Key? key}) : super(key: key);
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  Future<void> _login(BuildContext context) async {
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => TelaPrincipalContainer()),
+        );
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Erro ao fazer login')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro desconhecido ao fazer login')),
+        );
+      }
+    }
   }
 
   void _navigateToCadastro(BuildContext context) {
@@ -21,17 +44,6 @@ class LoginUsuario extends StatelessWidget {
       MaterialPageRoute(builder: (context) => CadastroUsuario()),
     );
   }
-
-  LoginUsuario({Key? key})
-      : super(
-          key: key,
-        );
-
-  TextEditingController emailController = TextEditingController();
-
-  TextEditingController passwordoneController = TextEditingController();
-
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +73,7 @@ class LoginUsuario extends StatelessWidget {
                           text: "Entrar",
                           margin: EdgeInsets.only(bottom: 88.v),
                           buttonStyle: CustomButtonStyles.fillPrimary,
-                          onPressed: () => _navigateToHome(context),
+                          onPressed: () => _login(context),
                         ),
                         GestureDetector(
                           onTap: () => _navigateToCadastro(context),
@@ -72,7 +84,6 @@ class LoginUsuario extends StatelessWidget {
                             ),
                           ),
                         ),
-                        
                         CustomImageView(
                           imagePath: ImageConstant.imgEllipse1421,
                           height: 216.v,
@@ -85,11 +96,11 @@ class LoginUsuario extends StatelessWidget {
                           width: 124.h,
                           alignment: Alignment.bottomRight,
                         ),
-                        _buildSocialLoginRow(context)
+                        _buildSocialLoginRow(context),
                       ],
                     ),
                   ),
-                  SizedBox(height: 4.v)
+                  SizedBox(height: 4.v),
                 ],
               ),
             ),
@@ -114,7 +125,7 @@ class LoginUsuario extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: theme.textTheme.displayMedium,
-          )
+          ),
         ],
       ),
     );
@@ -163,14 +174,14 @@ class LoginUsuario extends StatelessWidget {
                       ),
                       buttonTextStyle: CustomTextStyles.bodyLargeRubik,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
             SizedBox(height: 36.v),
             CustomTextFormField(
               controller: emailController,
-              hintText: "ProjetoIntegrado@gmail.com",
+              hintText: "seuEmail@gmail.com",
               hintStyle: CustomTextStyles.bodyLargeRubik,
               textInputType: TextInputType.emailAddress,
               suffix: Container(
@@ -189,10 +200,17 @@ class LoginUsuario extends StatelessWidget {
                 top: 16.v,
                 bottom: 16.v,
               ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, insira seu email';
+                }
+                return null;
+              },
             ),
             SizedBox(height: 18.v),
             CustomTextFormField(
-              controller: passwordoneController,
+              controller: passwordController,
+              hintText: "Digite sua senha",
               textInputAction: TextInputAction.done,
               suffix: Container(
                 margin: EdgeInsets.symmetric(
@@ -209,7 +227,13 @@ class LoginUsuario extends StatelessWidget {
                 maxHeight: 54.v,
               ),
               obscureText: true,
-            )
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, insira sua senha';
+                }
+                return null;
+              },
+            ),
           ],
         ),
       ),

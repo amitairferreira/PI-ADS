@@ -1,5 +1,7 @@
-import 'package:projeto_integrado/presentation/tela_login_usuario/tela_login_usuario.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:projeto_integrado/presentation/tela_login_usuario/tela_login_usuario.dart';
 import '../../core/app_export.dart';
 import '../../theme/custom_button_style.dart';
 import '../../widgets/custom_checkbox_button.dart';
@@ -7,28 +9,59 @@ import '../../widgets/custom_elevated_button.dart';
 import '../../widgets/custom_text_form_field.dart'; // ignore_for_file: must_be_immutable
 
 // ignore_for_file: must_be_immutable
-class CadastroUsuario extends StatelessWidget {
-  void _navigateToLogin(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => LoginUsuario()),
-    );
-  }
+class CadastroUsuario extends StatefulWidget {
+  CadastroUsuario({Key? key}) : super(key: key);
 
-  CadastroUsuario({Key? key})
-      : super(
-          key: key,
-        );
+  @override
+  _CadastroUsuarioState createState() => _CadastroUsuarioState();
+}
 
-  TextEditingController emailoneController = TextEditingController();
-
-  TextEditingController emailController = TextEditingController();
-
-  TextEditingController senhaoneController = TextEditingController();
+class _CadastroUsuarioState extends State<CadastroUsuario> {
+  final TextEditingController nomeController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController senhaController = TextEditingController();
 
   bool euconcordocomos = false;
 
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  Future<void> _register() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (!euconcordocomos) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Você deve concordar com os termos de uso')),
+        );
+        return;
+      }
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: senhaController.text,
+        );
+
+        await FirebaseFirestore.instance.collection('usuarios').doc(userCredential.user!.uid).set({
+          'nome': nomeController.text,
+          'email': emailController.text,
+        });
+
+        // Cadastro bem-sucedido, navegue para a tela de login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginUsuario()),
+        );
+      } on FirebaseAuthException catch (e) {
+        // Exiba a mensagem de erro
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Erro ao cadastrar')),
+        );
+      } catch (e) {
+        // Exiba outras mensagens de erro
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro desconhecido ao cadastrar')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +92,7 @@ class CadastroUsuario extends StatelessWidget {
                           width: 216.h,
                           text: "Criar conta",
                           buttonStyle: CustomButtonStyles.fillPrimary,
-                          onPressed: () => _navigateToLogin(context),
+                          onPressed: _register,
                         ),
                         CustomImageView(
                           imagePath: ImageConstant.imgEllipse142,
@@ -73,12 +106,12 @@ class CadastroUsuario extends StatelessWidget {
                           width: 124.h,
                           alignment: Alignment.bottomRight,
                         ),
-                        _buildTf(context)
+                        _buildTf(context),
                       ],
                     ),
                   ),
                   SizedBox(height: 26.v),
-                  _buildExistingAccountSection(context)
+                  _buildExistingAccountSection(context),
                 ],
               ),
             ),
@@ -103,7 +136,7 @@ class CadastroUsuario extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: theme.textTheme.displayMedium,
-          )
+          ),
         ],
       ),
     );
@@ -120,60 +153,31 @@ class CadastroUsuario extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: double.maxFinite,
-              margin: EdgeInsets.symmetric(horizontal: 34.h),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Expanded(
-                    child: CustomElevatedButton(
-                      height: 36.v,
-                      text: "Google",
-                      leftIcon: Container(
-                        margin: EdgeInsets.only(right: 10.h),
-                        child: CustomImageView(
-                          imagePath: ImageConstant.imgGroup,
-                          height: 12.adaptSize,
-                          width: 12.adaptSize,
-                        ),
-                      ),
-                      buttonTextStyle: CustomTextStyles.bodyMediumBluegray500,
-                    ),
-                  ),
-                  SizedBox(width: 14.h),
-                  Expanded(
-                    child: CustomElevatedButton(
-                      height: 36.v,
-                      text: "Facebook",
-                      leftIcon: Container(
-                        margin: EdgeInsets.only(right: 8.h),
-                        child: CustomImageView(
-                          imagePath: ImageConstant.imgGroupOnprimary,
-                          height: 12.adaptSize,
-                          width: 12.adaptSize,
-                        ),
-                      ),
-                      buttonTextStyle: CustomTextStyles.bodyMediumBluegray500,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(height: 16.v),
             CustomTextFormField(
-              controller: emailoneController,
+              controller: nomeController,
               hintText: "Nome completo",
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, insira seu nome completo';
+                }
+                return null;
+              },
             ),
             SizedBox(height: 16.v),
             CustomTextFormField(
               controller: emailController,
               hintText: "Email",
               textInputType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, insira seu email';
+                }
+                return null;
+              },
             ),
             SizedBox(height: 16.v),
             CustomTextFormField(
-              controller: senhaoneController,
+              controller: senhaController,
               hintText: "Senha",
               textInputAction: TextInputAction.done,
               textInputType: TextInputType.visiblePassword,
@@ -194,6 +198,12 @@ class CadastroUsuario extends StatelessWidget {
                 top: 16.v,
                 bottom: 16.v,
               ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, insira sua senha';
+                }
+                return null;
+              },
             ),
             SizedBox(height: 16.v),
             Align(
@@ -203,10 +213,12 @@ class CadastroUsuario extends StatelessWidget {
                 text: "Eu concordo com os termos de uso ",
                 value: euconcordocomos,
                 onChange: (value) {
-                  euconcordocomos = value;
+                  setState(() {
+                    euconcordocomos = value;
+                  });
                 },
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -237,12 +249,20 @@ class CadastroUsuario extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 24.h),
       child: Column(
         children: [
-          Text(
-            "Já tenho uma conta",
-            style: theme.textTheme.bodyMedium!.copyWith(
-              decoration: TextDecoration.underline,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginUsuario()),
+              );
+            },
+            child: Text(
+              "Já tenho uma conta",
+              style: theme.textTheme.bodyMedium!.copyWith(
+                decoration: TextDecoration.underline,
+              ),
             ),
-          )
+          ),
         ],
       ),
     );

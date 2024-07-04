@@ -32,10 +32,8 @@ class AppRoutes {
     telaInicialScreen: (context) => TelaInicial(),
     tlCadastroUsuRioScreen: (context) => CadastroUsuario(),
     tlCadastroEspecialistaScreen: (context) => CadastroEspecialista(),
-    telaPrincipalDepoisDoLoginPage: (context) =>
-        TelaPrincipal(),
-    telaPrincipalDepoisDoLoginContainerScreen: (context) =>
-        TelaPrincipalContainer(),
+    telaPrincipalDepoisDoLoginPage: (context) => TelaPrincipal(),
+    telaPrincipalDepoisDoLoginContainerScreen: (context) => TelaPrincipalContainer(),
     tlEntrarUsuRioScreen: (context) => LoginUsuario(),
     appNavigationScreen: (context) => AppNavigationScreen(),
     initialRoute: (context) => TelaInicial()

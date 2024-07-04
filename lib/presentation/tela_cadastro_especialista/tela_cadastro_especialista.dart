@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:projeto_integrado/presentation/tela_login_usuario/tela_login_usuario.dart';
 import '../../core/app_export.dart';
 import '../../theme/custom_button_style.dart';
 import '../../widgets/custom_checkbox_button.dart';
@@ -6,23 +9,61 @@ import '../../widgets/custom_elevated_button.dart';
 import '../../widgets/custom_text_form_field.dart'; // ignore_for_file: must_be_immutable
 
 // ignore_for_file: must_be_immutable
-class CadastroEspecialista extends StatelessWidget {
-  CadastroEspecialista({Key? key})
-      : super(
-          key: key,
-        );
+class CadastroEspecialista extends StatefulWidget {
+  CadastroEspecialista({Key? key}) : super(key: key);
 
-  TextEditingController emailoneController = TextEditingController();
+  @override
+  _CadastroEspecialistaState createState() => _CadastroEspecialistaState();
+}
 
-  TextEditingController emailController = TextEditingController();
-
-  TextEditingController crpvalueoneController = TextEditingController();
-
-  TextEditingController senhaoneController = TextEditingController();
+class _CadastroEspecialistaState extends State<CadastroEspecialista> {
+  final TextEditingController nomeController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController crpController = TextEditingController();
+  final TextEditingController senhaController = TextEditingController();
 
   bool euconcordocomos = false;
 
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  Future<void> _register() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (!euconcordocomos) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Você deve concordar com os termos de uso')),
+        );
+        return;
+      }
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: senhaController.text,
+        );
+
+        await FirebaseFirestore.instance.collection('especialistas').doc(userCredential.user!.uid).set({
+          'nome': nomeController.text,
+          'email': emailController.text,
+          'crp': crpController.text,
+        });
+
+        // Cadastro bem-sucedido, navegue para a tela de login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginUsuario()),
+        );
+      } on FirebaseAuthException catch (e) {
+        // Exiba a mensagem de erro
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Erro ao cadastrar')),
+        );
+      } catch (e) {
+        // Exiba outras mensagens de erro
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro desconhecido ao cadastrar')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +95,7 @@ class CadastroEspecialista extends StatelessWidget {
                           text: "Criar conta",
                           buttonStyle: CustomButtonStyles.fillPrimary,
                           alignment: Alignment.bottomCenter,
+                          onPressed: _register,
                         ),
                         CustomImageView(
                           imagePath: ImageConstant.imgEllipse142216x108,
@@ -67,12 +109,12 @@ class CadastroEspecialista extends StatelessWidget {
                           width: 124.h,
                           alignment: Alignment.bottomRight,
                         ),
-                        _buildGoogleRowSection(context)
+                        _buildGoogleRowSection(context),
                       ],
                     ),
                   ),
                   SizedBox(height: 26.v),
-                  _buildTf(context)
+                  _buildTf(context),
                 ],
               ),
             ),
@@ -97,7 +139,7 @@ class CadastroEspecialista extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: theme.textTheme.displayMedium,
-          )
+          ),
         ],
       ),
     );
@@ -131,23 +173,41 @@ class CadastroEspecialista extends StatelessWidget {
             ),
             SizedBox(height: 18.v),
             CustomTextFormField(
-              controller: emailoneController,
+              controller: nomeController,
               hintText: "Nome completo",
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, insira seu nome completo';
+                }
+                return null;
+              },
             ),
             SizedBox(height: 18.v),
             CustomTextFormField(
               controller: emailController,
               hintText: "Email",
               textInputType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, insira seu email';
+                }
+                return null;
+              },
             ),
             SizedBox(height: 18.v),
             CustomTextFormField(
-              controller: crpvalueoneController,
+              controller: crpController,
               hintText: "CRP",
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, insira seu CRP';
+                }
+                return null;
+              },
             ),
             SizedBox(height: 18.v),
             CustomTextFormField(
-              controller: senhaoneController,
+              controller: senhaController,
               hintText: "Senha",
               textInputAction: TextInputAction.done,
               textInputType: TextInputType.visiblePassword,
@@ -168,15 +228,23 @@ class CadastroEspecialista extends StatelessWidget {
                 top: 16.v,
                 bottom: 16.v,
               ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, insira sua senha';
+                }
+                return null;
+              },
             ),
             SizedBox(height: 18.v),
             CustomCheckboxButton(
               text: "Eu concordo com os termos de uso ",
               value: euconcordocomos,
               onChange: (value) {
-                euconcordocomos = value;
+                setState(() {
+                  euconcordocomos = value;
+                });
               },
-            )
+            ),
           ],
         ),
       ),
@@ -200,12 +268,20 @@ class CadastroEspecialista extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 24.h),
       child: Column(
         children: [
-          Text(
-            "Já tenho uma conta",
-            style: theme.textTheme.bodyMedium!.copyWith(
-              decoration: TextDecoration.underline,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginUsuario()),
+              );
+            },
+            child: Text(
+              "Já tenho uma conta",
+              style: theme.textTheme.bodyMedium!.copyWith(
+                decoration: TextDecoration.underline,
+              ),
             ),
-          )
+          ),
         ],
       ),
     );

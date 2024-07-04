@@ -1,5 +1,6 @@
 import 'package:projeto_integrado/presentation/tela_cadastro_especialista/tela_cadastro_especialista.dart';
 import 'package:projeto_integrado/presentation/tela_cadastro_usuario/tela_cadastro_usuario.dart';
+import 'package:projeto_integrado/presentation/tela_login_usuario/tela_login_usuario.dart';
 import 'package:flutter/material.dart';
 import '../../core/app_export.dart';
 
@@ -18,10 +19,17 @@ class TelaInicial extends StatelessWidget {
     );
   }
 
+  void _navigateToLogin(BuildContext context) { // Função para navegação para a tela de login
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LoginUsuario()),
+    );
+  }
+
   const TelaInicial({Key? key})
       : super(
-          key: key,
-        );
+    key: key,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +38,20 @@ class TelaInicial extends StatelessWidget {
         backgroundColor: theme.colorScheme.onPrimary,
         body: Column(
           children: [
+            // Adicionando AppBar com botão de Login
+            AppBar(
+              backgroundColor: theme.colorScheme.onPrimary,
+              elevation: 0,
+              actions: [
+                TextButton(
+                  onPressed: () => _navigateToLogin(context),
+                  child: Text(
+                    'Login',
+                    style: TextStyle(color: theme.colorScheme.primary),
+                  ),
+                ),
+              ],
+            ),
             Expanded(
               child: SingleChildScrollView(
                 child: Container(
@@ -79,12 +101,12 @@ class TelaInicial extends StatelessWidget {
   Widget _buildColumnencontreo(BuildContext context) {
     return Container(
       width: double.maxFinite,
-      margin: EdgeInsets.symmetric(horizontal: 12.h),
-      padding: EdgeInsets.symmetric(horizontal: 44.h),
+      margin: EdgeInsets.symmetric(horizontal: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 42.h),
       child: Column(
         children: [
           Text(
-            "Encontre o suporte  necessário para cuidar da sua saúde mental ",
+            "Encontre o suporte necessário para cuidar da sua saúde mental",
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
