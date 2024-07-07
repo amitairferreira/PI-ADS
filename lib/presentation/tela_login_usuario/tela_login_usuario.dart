@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:projeto_integrado/presentation/tela_cadastro_usuario/tela_cadastro_usuario.dart';
+// import 'package:projeto_integrado/presentation/tela_cadastro_usuario/tela_cadastro_usuario.dart';
+import 'package:projeto_integrado/presentation/tela_inicial/tela_inicial.dart';
 import 'package:projeto_integrado/presentation/tela_principal_container/tela_principal_container.dart';
 import '../../core/app_export.dart';
 import '../../theme/custom_button_style.dart';
@@ -8,6 +9,13 @@ import '../../widgets/custom_elevated_button.dart';
 import '../../widgets/custom_text_form_field.dart'; // ignore_for_file: must_be_immutable
 
 class LoginUsuario extends StatelessWidget {
+  void _navigateToHome(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => TelaInicial()),
+    );
+  }
+
   LoginUsuario({Key? key}) : super(key: key);
 
   final TextEditingController emailController = TextEditingController();
@@ -22,10 +30,10 @@ class LoginUsuario extends StatelessWidget {
           email: emailController.text,
           password: passwordController.text,
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => TelaPrincipalContainer()),
-        );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => TelaPrincipalContainer()),
+          );
       } on FirebaseAuthException catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.message ?? 'Erro ao fazer login')),
@@ -36,13 +44,6 @@ class LoginUsuario extends StatelessWidget {
         );
       }
     }
-  }
-
-  void _navigateToCadastro(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => CadastroUsuario()),
-    );
   }
 
   @override
@@ -61,9 +62,10 @@ class LoginUsuario extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildSoundMindSection(context),
+                  _buildSocialLoginRow(context),
                   SizedBox(height: 30.v),
                   SizedBox(
-                    height: 492.v,
+                    height: 222.v,
                     width: double.maxFinite,
                     child: Stack(
                       alignment: Alignment.bottomCenter,
@@ -76,27 +78,14 @@ class LoginUsuario extends StatelessWidget {
                           onPressed: () => _login(context),
                         ),
                         GestureDetector(
-                          onTap: () => _navigateToCadastro(context),
+                          onTap: () => _navigateToHome(context),
                           child: Text(
-                            "Criar uma conta",
+                            "Ir para Home",
                             style: theme.textTheme.bodyMedium!.copyWith(
                               decoration: TextDecoration.underline,
                             ),
                           ),
                         ),
-                        CustomImageView(
-                          imagePath: ImageConstant.imgEllipse1421,
-                          height: 216.v,
-                          width: 108.h,
-                          alignment: Alignment.topLeft,
-                        ),
-                        CustomImageView(
-                          imagePath: ImageConstant.imgEllipse1441,
-                          height: 274.v,
-                          width: 124.h,
-                          alignment: Alignment.bottomRight,
-                        ),
-                        _buildSocialLoginRow(context),
                       ],
                     ),
                   ),
@@ -203,6 +192,8 @@ class LoginUsuario extends StatelessWidget {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, insira seu email';
+                } else if (!RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+').hasMatch(value)) {
+                  return 'Por favor, insira um email válido';
                 }
                 return null;
               },
